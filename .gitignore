@@ -1,6 +1,9 @@
 # other
 .DS_Store
 *~
+.gradle
+.nextflow
+buildSrc/.gradle/*
 
 # publising details
 gradle.properties
