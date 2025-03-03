@@ -1,0 +1,11 @@
+# other
+.DS_Store
+*~
+
+# publising details
+gradle.properties
+
+# build folders
+build/*
+plugins/*/build
+buildSrc/build
