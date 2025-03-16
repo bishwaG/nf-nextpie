@@ -1,14 +1,40 @@
 # The plugin `nf-nextpie` 
  
-This project contains a Nextflow plugin called `nf-nextpie` which serves as a client for [Nextpie](https://github.com/bishwaG/Nextpie/) server. The project has been adapted from `nf-plugin`. The plugin readily comes with a config file `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. It contains default values of Nextpie server. The default config file assumes that Nextpie is running in `localhost`. The config file parameters can be modified according to one's need. 
+This project contains a Nextflow plugin called `nf-nextpie` which serves as a client for [Nextpie](https://github.com/bishwaG/Nextpie/) server. The project has been adapted from `nf-plugin`. The plugin readily comes with a config file `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. It contains parameters needed for Nextpie with default values. The default config file assumes that Nextpie is running in `localhost`. The config file parameters can be modified according to one's need. 
 
-Then default config parameters can be overwritten by provided commandline parameters `--host`, `--port`, and `--api_key` vi Nextflow's commandline. The following is an example.
+## Config file
+After the first use of the plugin in Nextflow using `-plugins nf-nextpie@0.0.1`, Nextflow will download the plugin to `$HOME/.nextflow/plugins/nf-nextpie-0.0.1`. The config file will be found from `$HOME/.nextflow/plugins/nf-nextpie-0.0.1/classes/nextflow/nextpie/config.json`. Following is the content of `config.json`. 
+
+```
+{
+  "host": "localhost",
+  "port": 5000,
+  "api-key": "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M",
+  "workflow-name-var" : "workflow_name",
+  "worfklow-version-var" : "workflow_ver"
+}
+```
+### `host`
+This is a hostname/IP address of a machine running Nextpie. The default value is `localhost` which meaning you should be running Nextpie in the current machine.
+
+### `port`
+This is the port in which Nextpie is running. Do not change the port until and unless you know what you are doing.
+
+### `api-key`
+This is a API key need for authntication. Using this key the client (nf-plugin) authenticates itself with Nextpie server. In production use, generate an unique API key from Nextpie's GUI and replace the defaut one. This is highly recommend for security reasons.
+
+### `workflow-name-var` and `worfklow-version-var`
+This is the name of Nextflow variable you used in the pipeline to store pipeline name. The default calue is `workflow_name` which means you have a variable named `workflow_name` in your Nextflow pipeline (eg. in `nextflow.config`). You can change the value `workflow_name` in `$HOME/.nextflow/plugins/nf-nextpie-0.0.1/classes/nextflow/nextpie/config.json` if you have different variable. Similary, the `worfklow-version-var` contains a variable name (default: `workflow_ver`) used in Nextflow pipeline to store pipeline version. This can also be changed according to your need.
+
+Then default config parameters can be overwritten by provided commandline parameters `--host`, `--port`, `--api_key`, `--workflow_name`, and `--workflow_ver` via Nextflow's commandline. The following is an example.
 
 ```
 /PATH/TO/nextflow run /path/to/main.nf \
   --host 192.168.0.5 \
   --port 80 \
-  --api_key HGnm4sdfiJHH06
+  --api_key HGnm4sdfiJHH06 \
+  --workflow_name myPipeline \
+  --workflow_ver 0.0.1
   ....
 ```
 
@@ -55,7 +81,6 @@ Then default config parameters can be overwritten by provided commandline parame
 ## Plugin classes
 
 - `nextpieFactory` and `nextpieObserver`: shows how to react to workflow events with custom behavior
-
 - `nextpiePlugin`: the plugin entry point
 
 ## Unit testing 
@@ -68,16 +93,15 @@ To run your unit tests, run the following command in the project root directory 
 
 ## Running the plugin
 
-To build and test the plugin during development, configure a local Nextflow build with the following steps:
-
 1. Clone the Nextpie repository:
     ```bash
+    cd $HOME
     git clone https://github.com/bishwaG/Nextpie.git
     ```
   
 2. Configure the plugin build to use the local Nextflow code:
     ```bash
-    cd Nextpie/cd assets/example-workflow/test-runs/
+    cd Nextpie/assets/example-workflow/test-runs/
     ```
   
 4. Run the Nextflow example workflow that comes with [Nextpie](https://github.com/bishwaG/Nextpie/).
@@ -90,17 +114,20 @@ To build and test the plugin during development, configure a local Nextflow buil
    -resume
 ```
 
-## Integrating with a Nextflow pipeline.
+> NOTE: `$HOME/Nextpie/cd assets/example-workflow/nextflow.config` contains `plugins { id 'nf-nextpie' }` which will tell Nextflow to pull `nf-nextpie` during a runtime.  The config file `nextflow.config` also contains variables `workflow_name` to store pipeline name and `workflow_ver` to store pipeline version. 
 
-To use the plugin in any Nexflow pipleine add the following content in `nextflow.config` file of your Nextflow pipeline.
+
+## Integrating `nf-nextpie` with a Nextflow pipeline.
+
+To use the plugin in any Nexflow pipleine add the following content in `nextflow.config` file of your Nextflow pipeline. This way the pipeline will use the plugin during every run.
 
 ```
 plugins {
   id 'nf-nextpie'
 }
-
 ```
 
+If you do not want to ad the plugin to a pipeline, but want to use in run-by-run basis provide `-plugins nf-nextpie@0.0.1` parameter in Nextflow's command-line.
 
 
 
