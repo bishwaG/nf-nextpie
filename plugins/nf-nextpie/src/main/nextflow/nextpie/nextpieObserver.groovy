@@ -43,6 +43,7 @@ class nextpieObserver implements TraceObserver {
     private String host
     private int port
     private String api_key
+    private Boolean trace_enabled
     private String trace_file
     private String workflow_name
     private String workflow_version
@@ -58,9 +59,20 @@ class nextpieObserver implements TraceObserver {
         //println conf
         
         // get trace file
-        def trace_file = conf.trace['file']
-        //println "[NEXTPIE] Trace file: " + trace_file
+        def trace_file    = conf.trace['file']
+        def trace_enabled = conf.trace['enabled']
+        
         this.trace_file = trace_file
+        this.trace_enabled = trace_enabled
+        
+        //println "[NEXTPIE] Trace enabled: " + this.trace_file
+        //println "[NEXTPIE] Trace file: " + this.trace_enabled
+        
+        if(!trace_enabled){
+           def err_msg = "Upload will be skipped because trace.enable is set to false.\n"
+           err_msg    += "          Set trace.enable=true and trace.file=/path/to/Trace.txt in nextflow.config."
+           println "[NEXTPIE] ${err_msg}"
+        }
         
         
         // get workflow name and version
@@ -80,7 +92,8 @@ class nextpieObserver implements TraceObserver {
         def file = new File(configFile.toString())
         
         if (file.exists()) {
-            println "[NEXTPIE] Config file: " + configFile
+            if(this.trace_enabled)
+                println "[NEXTPIE] Config file: " + configFile
             
             def content = new String(Files.readAllBytes(configFile))
             def json = new JsonSlurper().parseText(content)
@@ -129,7 +142,12 @@ class nextpieObserver implements TraceObserver {
         //log.info "Pipeline complete! 👋"
         
         def t_file = new File(this.trace_file.toString())
-        if (t_file.exists()) {
+        
+        if (!t_file.exists()){
+            def error_msg  = "[NEXTPIE] Trace file ${this.trace_file} does not exist.\n"
+            log.error(error_msg)
+        }
+        if (t_file.exists() && this.trace_enabled) {
             log.info "[NEXTPIE] Uploading usage data!"
             log.info "[NEXTPIE] Trace file: " + this.trace_file
 
