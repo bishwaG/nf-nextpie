@@ -1,6 +1,16 @@
-# nf-nextpie plugin 
+# The plugin `nf-nextpie` 
  
-This project contains a Nextflow plugin called `nf-nextpie` which serves as a client for [Nextpie](https://github.com/bishwaG/Nextpie/) server. The project has been adapted from `nf-plugin`. The plugin readily comes with a config file `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. It contains default values of Nextpie server. The default config file assumes that Nextpie is running in `localhost`. The config file parameters can be modified according to one's need.
+This project contains a Nextflow plugin called `nf-nextpie` which serves as a client for [Nextpie](https://github.com/bishwaG/Nextpie/) server. The project has been adapted from `nf-plugin`. The plugin readily comes with a config file `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. It contains default values of Nextpie server. The default config file assumes that Nextpie is running in `localhost`. The config file parameters can be modified according to one's need. 
+
+Then default config parameters can be overwritten by provided commandline parameters `--host`, `--port`, and `--api_key` vi Nextflow's commandline. The following is an example.
+
+```
+/PATH/TO/nextflow run /path/to/main.nf \
+  --host 192.168.0.5 \
+  --port 80 \
+  --api_key HGnm4sdfiJHH06
+  ....
+```
 
 ## Plugin structure
 

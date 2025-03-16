@@ -55,12 +55,13 @@ class nextpieObserver implements TraceObserver {
         
         // Get CLI params
         def conf = session.getConfig()
-        println conf
+        //println conf
         
         // get trace file
         def trace_file = conf.trace['file']
-        println "Trace file: " + trace_file
+        //println "[NEXTPIE] Trace file: " + trace_file
         this.trace_file = trace_file
+        
         
         // get workflow name and version
         this.workflow_name    = conf.params['workflow_name']
@@ -70,7 +71,7 @@ class nextpieObserver implements TraceObserver {
         
         // Get the plugin's directory path and point to config.json
         def pluginDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).toString()
-        def configFile = Paths.get(pluginDir, "/nextflow/hello/config.json")
+        def configFile = Paths.get(pluginDir, "/nextflow/nextpie/config.json")
         
         //println "Plugin Dir: " + pluginDir
         //println "Config File: " + configFile
@@ -79,28 +80,47 @@ class nextpieObserver implements TraceObserver {
         def file = new File(configFile.toString())
         
         if (file.exists()) {
-            println "Nextpie config file: " + configFile
+            println "[NEXTPIE] Config file: " + configFile
             
             def content = new String(Files.readAllBytes(configFile))
             def json = new JsonSlurper().parseText(content)
             
-            // get json data
+            // get json data using keys
             def host    = json['host']
             def port    = json['port']
             def api_key = json['api-key']
+            def workflow_name  = json['workflow-name-var']
+            def workflow_ver   = json['worfklow-version-var']
             
+            // if provided via commandline or provided via nextflow.config params.workflow_name and params.workflow_ver
+            if(conf.params["${workflow_name}"]==null || conf.params["${workflow_ver}"] == null){
+                def error_msg  = "[NEXTPIE] Cannot extract workflow name and version from the pipeline.\n"
+                error_msg += "Add either params.${workflow_name} and params.${workflow_ver} in your Nextflow\n"
+                error_msg += "pipeline's nextlow.config file or provide via command-line (--${workflow_name}\n"
+                error_msg += "and --${workflow_ver})."
+                log.error(error_msg)
+                
+                System.exit(1)
+            }
             
-            println("Host: $host, Port: $port, API-key: $api_key")
+            this.workflow_name    = conf.params["${workflow_name}"]
+            this.workflow_version = conf.params["${workflow_ver}"]
+            
+            //println(this.workflow_name)
+            //println(this.workflow_version)
+            //println("Host: $host, Port: $port, API-key: $api_key")
             
             this.host    = host
             this.port    = port.toString().toInteger()
             this.api_key = api_key
             
         } else {
-            println("⚠️ Nextpie config file not found. Using defaults.")
-            this.host    = "localhost"
-            this.port    = 5005
-            this.api_key = "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M"
+            println("[NEXTPIE] ⚠️ Config file not found. Using defaults.")
+            this.host          = "localhost"
+            this.port          = 5000
+            this.api_key       = "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M"
+            this.workflow_name = conf.params['workflow_name']
+            this.workflow_version  = conf.params['workflow_ver']
         }
     }
 
@@ -110,12 +130,12 @@ class nextpieObserver implements TraceObserver {
         
         def t_file = new File(this.trace_file.toString())
         if (t_file.exists()) {
-            log.info "Pushing resource usage data to Nextpie!"
-            log.info "Trace file: " + this.trace_file
+            log.info "[NEXTPIE] Uploading usage data!"
+            log.info "[NEXTPIE] Trace file: " + this.trace_file
 
 	    // Construct URI
 	    String uri = "http://${host}:${port}/api/v1.0/upload-data"
-	    log.info "URI: " + uri
+	    log.info "[NEXTPIE] URI: " + uri
 	    
 	    // Build the HTTP client
 	    def client = HttpClient.newHttpClient()
@@ -158,28 +178,28 @@ class nextpieObserver implements TraceObserver {
 
 		// Handle success
 		if (response.statusCode() == 200) {
-		    println "☑️ " + response.body()
+		    println "[NEXTPIE] Response:\n " + response.body()
 		} else if (response.statusCode() == 401) {
-		    println "UNAUTHORIZED (401)"
+		    println "[NEXTPIE] UNAUTHORIZED (401)"
 		} else if (response.statusCode() == 403) {
-		    println "FORBIDDEN (403)"
+		    println "[NEXTPIE] FORBIDDEN (403)"
 		} else if (response.statusCode() == 404) {
-		    println "NOT FOUND (404)"
+		    println "[NEXTPIE] NOT FOUND (404)"
 		} else if (response.statusCode() == 503) {
-		    println "Service Unavailable (503)"
+		    println "[NEXTPIE] Service Unavailable (503)"
 		} else {
-		    println "Unexpected status: ${response.statusCode()}"
+		    println "[NEXTPIE] Unexpected status: ${response.statusCode()}"
 		}
 
 	    } catch (UnknownHostException e) {
 		// This exception occurs if the host is unreachable or DNS resolution fails
-		println "⚠️ Error: Unable to reach host."
+		println "[NEXTPIE] Error: Unable to reach host."
 	    } catch (IOException e) {
 		// Handle other I/O exceptions such as connection issues
-		println "⚠️ Error: Network issue or server not running."
+		println "[NEXTPIE] Error: Network issue or Nextpie server is not live."
 	    } catch (Exception e) {
 		// General error handler
-		println "⚠️ Error: ${e.message}"
+		println "[NEXTPIE] Error: ${e.message}"
 	    }
     
             
