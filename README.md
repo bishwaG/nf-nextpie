@@ -1,6 +1,8 @@
 # The plugin `nf-nextpie` 
  
-This project contains a Nextflow plugin called `nf-nextpie` which serves as a client for [Nextpie](https://github.com/bishwaG/Nextpie/) server. The project has been adapted from `nf-plugin`. The plugin readily comes with a config file `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. It contains parameters needed for Nextpie with default values. The default config file assumes that Nextpie is running in `localhost`. The config file parameters can be modified according to one's need. 
+The project contains a Nextflow plugin (adapted from `nf-plugin`) called `nf-nextpie` which serves as a client for [Nextpie](https://github.com/bishwaG/Nextpie/) server. The plugin uploads (trace.txt file) resource usage data from a nextflow pipeline to Nextpie for aggregated resource usage analysis and visualization.
+
+The plugin readily comes with a config file `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. It contains parameters needed for Nextpie with default values. The default config file assumes that Nextpie is running in `localhost`. The config file parameters can be modified according to one's need. 
 
 ## Config file
 After the first use of the plugin in Nextflow using `-plugins nf-nextpie@0.0.1`, Nextflow will download the plugin to `$HOME/.nextflow/plugins/nf-nextpie-0.0.1`. The config file will be found from `$HOME/.nextflow/plugins/nf-nextpie-0.0.1/classes/nextflow/nextpie/config.json`. Following is the content of `config.json`. 
