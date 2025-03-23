@@ -1,3 +1,4 @@
+
 # The plugin `nf-nextpie` 
  
 The project contains a Nextflow plugin (adapted from `nf-plugin`) called `nf-nextpie` which serves as a client for [Nextpie](https://github.com/bishwaG/Nextpie/) server. The plugin uploads (trace.txt file) resource usage data from a nextflow pipeline to Nextpie for aggregated resource usage analysis and visualization.
@@ -44,38 +45,38 @@ Then default config parameters can be overwritten by provided commandline parame
 
 ```
 ├── plugins
-│   ├── build.gradle
-│   └── nf-nextpie                          #The plugin base directory.
-│       ├── build.gradle                    #Plugin Gradle build file.
-│       └── src
-│          ├── main                        #The plugin implementation sources.
-│          │   └── nextflow
-│          │       └── nextpie
-│          │           ├── config.json
-│          │           ├── nextpieFactory.groovy
-│          │           ├── nextpieObserver.groovy
-│          │           └── nextpiePlugin.groovy
-│          ├── resources
-│          │   └── META-INF
-│          │       ├── extensions.idx       #This file declares one or more extension classes 
+│   ├── build.gradle
+│   └── nf-nextpie                          #The plugin base directory.
+│       ├── build.gradle                    #Plugin Gradle build file.
+│       └── src
+│          ├── main                        #The plugin implementation sources.
+│          │   └── nextflow
+│          │       └── nextpie
+│          │           ├── config.json
+│          │           ├── nextpieFactory.groovy
+│          │           ├── nextpieObserver.groovy
+│          │           └── nextpiePlugin.groovy
+│          ├── resources
+│          │   └── META-INF
+│          │       ├── extensions.idx       #This file declares one or more extension classes 
 │          │       │                        #provided by the plugin. Each line should contain 
 │          │       │                        # the fully qualified name of a Java class that 
 │          │       │                        #implements the org.pf4j.ExtensionPoint interface.
 │          │       │
-│          │       └── MANIFEST.MF          #Manifest file defining the plugin attributes
+│          │       └── MANIFEST.MF          #Manifest file defining the plugin attributes
 │          │                                #e.g. name, version, etc. The attribute Plugin-Class
 │          │                                #declares the plugin main class. This class should 
 │          │                                #extend the base class nextflow.plugin.BasePlugin 
 │          │                                #e.g. `nextflow.nextpie.nextpiePlugin`.
 │          │
-│          └── test                         #The plugin unit tests.                  
-│              └── nextflow
-│                  └── nextpie
-│                      ├── HelloDslTest.groovy
-│                      ├── MockHelpers.groovy
-│                      ├── nextpieFactoryTest.groovy
-│                      └── TestHelper.groovy
-│       
+│          └── test                         #The plugin unit tests.                  
+│              └── nextflow
+│                  └── nextpie
+│                      ├── HelloDslTest.groovy
+│                      ├── MockHelpers.groovy
+│                      ├── nextpieFactoryTest.groovy
+│                      └── TestHelper.groovy
+│       
 ├── README.md
 └──  settings.gradle                         #Gradle project settings.
 ```
@@ -84,14 +85,6 @@ Then default config parameters can be overwritten by provided commandline parame
 
 - `nextpieFactory` and `nextpieObserver`: shows how to react to workflow events with custom behavior
 - `nextpiePlugin`: the plugin entry point
-
-## Unit testing 
-
-To run your unit tests, run the following command in the project root directory (ie. where the file `settings.gradle` is located):
-
-```bash
-./gradlew check
-```
 
 ## Running the plugin
 
@@ -131,5 +124,23 @@ plugins {
 
 If you do not want to ad the plugin to a pipeline, but want to use in run-by-run basis provide `-plugins nf-nextpie@0.0.1` parameter in Nextflow's command-line.
 
+## Building and installing the plugin
 
+```
+## Clone the repo
+git clone https://github.com/bishwaG/nf-nextpie.git
+
+## Unit testing
+make check
+
+## build the plugin
+make
+
+## Install the plugin
+## Installs to $HOME/.nextflow/plugins
+make install
+
+## Upload to Git and make a version release
+make upload
+```
 
