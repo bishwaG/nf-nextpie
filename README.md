@@ -61,7 +61,7 @@ params {
 
 ## Default Behavior
 
-By default, the plugin looks for `name` and `version` variables in the `manifest` scope. If these are present, the plugin will **ignore** the `params.workflow_name` and `params.workflow_ver` values and use the ones from the `manifest`.
+By default, the plugin searches `name` and `version` variables within the `manifest` scope. If these  variables are present within the `manifest` scope , the plugin will **ignore** the `params.workflow_name` and `params.workflow_ver` values (that are within the `params` scope) and use the ones from the `manifest`.
 
 **Example:**
 
