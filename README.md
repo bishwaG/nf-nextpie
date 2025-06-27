@@ -1,55 +1,133 @@
 
-# The plugin `nf-nextpie` 
- 
-The project contains a Nextflow plugin (adapted from `nf-plugin`) called `nf-nextpie` which serves as a client for [Nextpie](https://github.com/bishwaG/Nextpie/) server. The plugin uploads (trace.txt file) resource usage data from a nextflow pipeline to Nextpie for aggregated resource usage analysis and visualization.
+# The `nf-nextpie` Plugin
 
-The plugin readily comes with a config file `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. It contains parameters needed for Nextpie with default values. The default config file assumes that Nextpie is running in `localhost`. The config file parameters can be modified according to one's need. 
+This project provides a Nextflow plugin called `nf-nextpie` (adapted from [nf-hello](https://github.com/nextflow-io/nf-hello)) that serves as a client for the [Nextpie](https://github.com/bishwaG/Nextpie/) server. The plugin uploads a trace file (containing resource usage data) from a Nextflow pipeline to Nextpie for aggregated resource usage analysis and visualization.
 
-## Config file
-After the first use of the plugin in Nextflow using `-plugins nf-nextpie@0.0.1`, Nextflow will download the plugin to `$HOME/.nextflow/plugins/nf-nextpie-0.0.1`. The config file will be found from `$HOME/.nextflow/plugins/nf-nextpie-0.0.1/classes/nextflow/nextpie/config.json`. Following is the content of `config.json`. 
+The plugin includes a configuration file located at `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. This file contains parameters required for `nf-nextpie` to communicate with the Nextpie server. By default, it assumes Nextpie is running on `localhost`. You can modify the parameters in the config file to suit your environment.
+
+## Prerequisites
+
+Since the plugin uploads a trace file along with other metadata (pipeline name, version, research group name, and project name), it is essential to enable trace file generation in a Nextflow pipeline. This can be done in one of the following ways:
+
+- By supplying the `-with-trace` command-line option to Nextflow.
+- By adding `-with-trace` to the pipeline's configuration file (`nextflow.config`).
+
+## The Configuration File
+
+After the plugin is first used with Nextflow (e.g., via `-plugins nf-nextpie@0.0.2`), it is downloaded into `$HOME/.nextflow/plugins/nf-nextpie-0.0.2`. The configuration file can be found at:
 
 ```
+$HOME/.nextflow/plugins/nf-nextpie-0.0.2/classes/nextflow/nextpie/config.json
+```
+
+The default contents of `config.json` are:
+
+```json
 {
   "host": "localhost",
   "port": 5000,
   "api-key": "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M",
-  "workflow-name-var" : "workflow_name",
-  "worfklow-version-var" : "workflow_ver"
+  "workflow-name-var": "workflow_name",
+  "workflow-version-var": "workflow_ver"
 }
 ```
+
 ### `host`
-This is a hostname/IP address of a machine running Nextpie. The default value is `localhost` which meaning you should be running Nextpie in the current machine.
+
+The hostname or IP address of the machine running the Nextpie server. The default is `localhost`, which refers to the local machine.
 
 ### `port`
-This is the port in which Nextpie is running. Do not change the port until and unless you know what you are doing.
+
+The port on which the Nextpie server is running. Do not change this unless you know what you're doing or if the default port is already in use.
 
 ### `api-key`
-This is a API key need for authntication. Using this key the client (nf-plugin) authenticates itself with Nextpie server. In production use, generate an unique API key from Nextpie's GUI and replace the defaut one. This is highly recommend for security reasons.
 
-### `workflow-name-var` and `worfklow-version-var`
-This is the name of Nextflow variable you used in the pipeline to store pipeline name. The default calue is `workflow_name` which means you have a variable named `workflow_name` in your Nextflow pipeline (eg. in `nextflow.config`). You can change the value `workflow_name` in `$HOME/.nextflow/plugins/nf-nextpie-0.0.1/classes/nextflow/nextpie/config.json` if you have different variable. Similary, the `worfklow-version-var` contains a variable name (default: `workflow_ver`) used in Nextflow pipeline to store pipeline version. This can also be changed according to your need.
+An API key required for authentication. The client (`nf-nextpie`) uses this key to authenticate with the Nextpie server. In a production environment, it is highly recommended to generate a unique API key using the Nextpie GUI and replace the default value for security purposes.
 
-Then default config parameters can be overwritten by provided commandline parameters `--host`, `--port`, `--api_key`, `--workflow_name`, and `--workflow_ver` via Nextflow's commandline. The following is an example.
+### `workflow-name-var` and `workflow-version-var`
 
+These are the names of the Nextflow variables that store the pipeline name and version, respectively. By default, they are set to `workflow_name` and `workflow_ver`, meaning these variables should exist in your pipeline's `params` scope (e.g., in `nextflow.config`).
+
+If your pipeline uses different variable names, update the config file accordingly.
+
+The plugin looks for these variables inside the `params` scope. You should define them as follows:
+
+```groovy
+params {
+  workflow_name = 'my-workflow'
+  workflow_ver  = '1.0.1'
+}
 ```
-/PATH/TO/nextflow run /path/to/main.nf \
-  --host 192.168.0.5 \
-  --port 80 \
-  --api_key HGnm4sdfiJHH06 \
-  --workflow_name myPipeline \
-  --workflow_ver 0.0.1
-  ....
+
+## Default Behavior
+
+By default, the plugin looks for `name` and `version` variables in the `manifest` scope. If these are present, the plugin will **ignore** the `params.workflow_name` and `params.workflow_ver` values and use the ones from the `manifest`.
+
+**Example:**
+
+```groovy
+manifest {
+  name    = 'my-workflow'
+  version = '1.0.1'
+}
 ```
 
-## Plugin structure
+## Integrating `nf-nextpie` with a Nextflow Pipeline
+
+There are two ways to integrate `nf-nextpie` into a Nextflow pipeline:
+
+### ✅ Option 1: Using `nextflow.config`
+
+Add the following to the `plugins` block in `nextflow.config`:
+
+```groovy
+plugins {
+  id 'nf-nextpie@0.0.2'
+}
+```
+
+This allows all runs of the pipeline to use the plugin by default.
+
+### ✅ Option 2: Using the Command Line
+
+Supply the plugin using the command-line option for each run:
+
+```bash
+nextflow run mypipeline.nf -plugins nf-nextpie@0.0.2
+```
+
+## Running an Example Pipeline
+
+Refer to the official [Nextpie documentation](https://github.com/bishwaG/Nextpie/blob/main/docs/nextflow-workflow.md) for details on running an example Nextflow pipeline.
+
+## Building and Installing the Plugin
+
+```bash
+# Clone the repository
+git clone https://github.com/bishwaG/nf-nextpie.git
+
+# Run unit tests
+make check
+
+# Build the plugin
+make
+
+# Install the plugin to $HOME/.nextflow/plugins
+make install
+
+# Upload to GitHub and release a version
+make upload
+```
+
+## Plugin Structure
 
 ```
 ├── plugins
 │   ├── build.gradle
-│   └── nf-nextpie                          #The plugin base directory.
-│       ├── build.gradle                    #Plugin Gradle build file.
+│   └── nf-nextpie                          # Plugin base directory
+│       ├── build.gradle                    # Plugin's Gradle build file
 │       └── src
-│          ├── main                        #The plugin implementation sources.
+│          ├── main                         # Plugin implementation sources
 │          │   └── nextflow
 │          │       └── nextpie
 │          │           ├── config.json
@@ -58,89 +136,20 @@ Then default config parameters can be overwritten by provided commandline parame
 │          │           └── nextpiePlugin.groovy
 │          ├── resources
 │          │   └── META-INF
-│          │       ├── extensions.idx       #This file declares one or more extension classes 
-│          │       │                        #provided by the plugin. Each line should contain 
-│          │       │                        # the fully qualified name of a Java class that 
-│          │       │                        #implements the org.pf4j.ExtensionPoint interface.
-│          │       │
-│          │       └── MANIFEST.MF          #Manifest file defining the plugin attributes
-│          │                                #e.g. name, version, etc. The attribute Plugin-Class
-│          │                                #declares the plugin main class. This class should 
-│          │                                #extend the base class nextflow.plugin.BasePlugin 
-│          │                                #e.g. `nextflow.nextpie.nextpiePlugin`.
-│          │
-│          └── test                         #The plugin unit tests.                  
+│          │       ├── extensions.idx       # Declares plugin extension classes
+│          │       └── MANIFEST.MF          # Defines plugin metadata and main class
+│          └── test                         # Unit tests for the plugin
 │              └── nextflow
 │                  └── nextpie
 │                      ├── HelloDslTest.groovy
 │                      ├── MockHelpers.groovy
 │                      ├── nextpieFactoryTest.groovy
 │                      └── TestHelper.groovy
-│       
 ├── README.md
-└──  settings.gradle                         #Gradle project settings.
+└── settings.gradle                         # Gradle project settings
 ```
 
-## Plugin classes
+## Plugin Classes
 
-- `nextpieFactory` and `nextpieObserver`: shows how to react to workflow events with custom behavior
-- `nextpiePlugin`: the plugin entry point
-
-## Running the plugin
-
-1. Clone the Nextpie repository:
-    ```bash
-    cd $HOME
-    git clone https://github.com/bishwaG/Nextpie.git
-    ```
-  
-2. Configure the plugin build to use the local Nextflow code:
-    ```bash
-    cd Nextpie/assets/example-workflow/test-runs/
-    ```
-  
-4. Run the Nextflow example workflow that comes with [Nextpie](https://github.com/bishwaG/Nextpie/).
-```
-./nextflow run \
-   ../main.nf \
-   --fastqs 'fastq/*_R{1,2}*.fastq.gz' \
-   --name "test_project" \
-   --group "test_research_group" \
-   -resume
-```
-
-> NOTE: `$HOME/Nextpie/cd assets/example-workflow/nextflow.config` contains `plugins { id 'nf-nextpie' }` which will tell Nextflow to pull `nf-nextpie` during a runtime.  The config file `nextflow.config` also contains variables `workflow_name` to store pipeline name and `workflow_ver` to store pipeline version. 
-
-
-## Integrating `nf-nextpie` with a Nextflow pipeline.
-
-To use the plugin in any Nexflow pipleine add the following content in `nextflow.config` file of your Nextflow pipeline. This way the pipeline will use the plugin during every run.
-
-```
-plugins {
-  id 'nf-nextpie'
-}
-```
-
-If you do not want to ad the plugin to a pipeline, but want to use in run-by-run basis provide `-plugins nf-nextpie@0.0.1` parameter in Nextflow's command-line.
-
-## Building and installing the plugin
-
-```
-## Clone the repo
-git clone https://github.com/bishwaG/nf-nextpie.git
-
-## Unit testing
-make check
-
-## build the plugin
-make
-
-## Install the plugin
-## Installs to $HOME/.nextflow/plugins
-make install
-
-## Upload to Git and make a version release
-make upload
-```
-
+- `nextpieFactory` and `nextpieObserver`: Define custom behaviors in response to workflow events.
+- `nextpiePlugin`: Serves as the plugin entry point.

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Plugin-Id: nf-nextpie
-Plugin-Version: 0.0.1
+Plugin-Version: 0.0.2
 Plugin-Class: nextflow.nextpie.nextpiePlugin
 Plugin-Provider: nextflow
 Plugin-Requires: >=24.10.4

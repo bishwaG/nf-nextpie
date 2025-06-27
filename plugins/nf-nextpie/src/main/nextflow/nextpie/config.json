@@ -3,5 +3,5 @@
   "port": 5000,
   "api-key": "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M",
   "workflow-name-var" : "workflow_name",
-  "worfklow-version-var" : "workflow_ver"
+  "workflow-version-var" : "workflow_ver"
 }

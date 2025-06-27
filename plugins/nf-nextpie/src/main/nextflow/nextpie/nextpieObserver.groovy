@@ -81,6 +81,25 @@ class nextpieObserver implements TraceObserver {
         this.group            = conf.params['group']
         this.project          = conf.params['name']
         
+        if( this.workflow_name  !== null && this.workflow_version !== null){
+        println "[NEXTPIE] Pipeline name ${this.workflow_name} and version label ${this.workflow_version} found in params scope."
+        }
+        
+        // get workflow name and version from manifest
+        def manifest = session.config.get('manifest')
+        
+        if (manifest) {
+        	def manifestName = conf.manifest['name']
+		def manifestVer  = conf.manifest['version']
+		
+		if( manifestName!== "" && manifestVer !==""){
+		println "[NEXTPIE] Pipeline name ${manifestName} and version label ${manifestVer} found in manifest scope. This will be used."
+		this.workflow_name = manifestName
+		this.workflow_version = manifestVer
+        	}
+        
+        }
+        
         // Get the plugin's directory path and point to config.json
         def pluginDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).toString()
         def configFile = Paths.get(pluginDir, "/nextflow/nextpie/config.json")
@@ -103,21 +122,25 @@ class nextpieObserver implements TraceObserver {
             def port    = json['port']
             def api_key = json['api-key']
             def workflow_name  = json['workflow-name-var']
-            def workflow_ver   = json['worfklow-version-var']
+            def workflow_ver   = json['workflow-version-var']
             
             // if provided via commandline or provided via nextflow.config params.workflow_name and params.workflow_ver
-            if(conf.params["${workflow_name}"]==null || conf.params["${workflow_ver}"] == null){
+            if(this.workflow_name==null || this.workflow_version == null){
                 def error_msg  = "[NEXTPIE] Cannot extract workflow name and version from the pipeline.\n"
-                error_msg += "Add either params.${workflow_name} and params.${workflow_ver} in your Nextflow\n"
-                error_msg += "pipeline's nextlow.config file or provide via command-line (--${workflow_name}\n"
-                error_msg += "and --${workflow_ver})."
+                error_msg += "OPTION 1: Add ${workflow_name} and ${workflow_ver} inside params scope in nextflow.config\n"
+                error_msg += "          Example:\n"
+                error_msg += "          params { workflow_name = 'my-workflow'\n"
+                error_msg += "                   workflow_ver  = '1.0.1'\n"
+                error_msg += "          }\n\n"
+                error_msg += "OPTION 2: Add name and version inside manifest scope in nextflow.config. [The highest priority]\n"
+                error_msg += "          Example:\n"
+                error_msg += "          manifest { name     = 'my-workflow'\n"
+                error_msg += "                     version  = '1.0.1'\n"
+                error_msg += "          }"
                 log.error(error_msg)
                 
                 System.exit(1)
             }
-            
-            this.workflow_name    = conf.params["${workflow_name}"]
-            this.workflow_version = conf.params["${workflow_ver}"]
             
             //println(this.workflow_name)
             //println(this.workflow_version)
