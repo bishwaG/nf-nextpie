@@ -12,6 +12,22 @@ Since the plugin uploads a trace file along with other metadata (pipeline name, 
 - By supplying the `-with-trace` command-line option to Nextflow.
 - By adding `-with-trace` to the pipeline's configuration file (`nextflow.config`).
 
+Additionally, Nextpie expects the following default columns to be present in the trace file. If you have custom columns, ensure that the trace file still includes the default columns with values in the expected format. However, there is no strict requirement for the order of the columns.
+
+| task_id | hash | native_id | name | status | exit | submit | duration | realtime | %cpu | peak_rss | peak_vmem | rchar | wchar |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 5 | 9b/fa305b | - | workflow_summary | COMPLETED | - | 2023-10-04T12:03:41.000 | 22ms | 8ms | - | - | - | - | - |
+| 6 | f5/b4dee1 | 18151 | version_collection | COMPLETED | 0 | 2023-10-04T12:03:41.000 | 36.9s | 18.7s | 30.80% | 57 MB | 397.5 MB | 26.5 MB | 27 KB |
+| 1 | 91/d15668 | 7319786 | fastqc (Sample_1) | COMPLETED | 0 | 2023-10-04T12:03:41.000 | 20m 24s | 20m 15s | 100.30% | 364.8 MB | 3.5 GB | 9.5 GB | 2.1 MB |
+| 2 | e6/12653d | 7319785 | fastqc (Sample_2) | COMPLETED | 0 | 2023-10-04T12:03:41.000 | 26m 19s | 26m | 101.10% | 418.2 MB | 3.5 GB | 12.1 GB | 2.1 MB |
+| 3 | a5/b975da | 7319781 | trim_galore (Sample_1) | COMPLETED | 0 | 2023-10-04T12:03:41.000 | 39m 15s | 38m 55s | 436.10% | 4.3 GB | 6 GB | 331.6 GB | 322 GB |
+| 4 | 06/ad2faa | 7319782 | trim_galore (Sample_2) | COMPLETED | 0 | 2023-10-04T12:03:41.000 | 49m 31s | 48m 58s | 440.30% | 4.4 GB | 6 GB | 429.5 GB | 417.2 GB |
+| 7 | 7f/7d1fc9 | 7319792 | star (Sample_1) | COMPLETED | 0 | 2023-10-04T12:42:56.000 | 1h 8m 37s | 1h 7m 49s | 614.90% | 36.2 GB | 38.7 GB | 194.4 GB | 65.9 GB |
+| 8 | 89/7ad716 | 7319956 | featureCounts (Sample_1) | COMPLETED | 0 | 2023-10-04T13:51:33.000 | 32m 50s | 7m 4s | 445.50% | 937.1 MB | 1.6 GB | 25.9 GB | 4.8 GB |
+| 9 | e7/58347f | 7319820 | star (Sample_2) | COMPLETED | 0 | 2023-10-04T12:53:12.000 | 1h 37m 56s | 1h 37m 33s | 702.80% | 36.4 GB | 39 GB | 255.2 GB | 95 GB |
+| 10 | 7f/6efca0 | 7320052 | featureCounts (Sample_2) | COMPLETED | 0 | 2023-10-04T14:31:10.000 | 28m 34s | 17m 35s | 341.00% | 1.3 GB | 1.9 GB | 55.5 GB | 21.9 GB |
+
+
 ## The Configuration File
 
 After the plugin is first used with Nextflow (e.g., via `-plugins nf-nextpie@0.0.2`), it is downloaded into `$HOME/.nextflow/plugins/nf-nextpie-0.0.2`. The configuration file can be found at:
