@@ -59,9 +59,11 @@ params {
 }
 ```
 
+>NOTE: If you are using [nf-schema](https://github.com/nextflow-io/nf-schema) in your pipeline, the default behavior (section below) might be more attractive because no configurational modification is required in a Nextflow pipeline as long as the pipeline has `name` (variable storing pipeline name) and `version` (variable storing pipeline version) within `manifest` scope.
+
 ## Default Behavior
 
-By default, the plugin searches `name` and `version` variables within the `manifest` scope. If these  variables are present within the `manifest` scope , the plugin will **ignore** the `params.workflow_name` and `params.workflow_ver` values (that are within the `params` scope) and use the ones from the `manifest`.
+By default, the plugin searches `name` and `version` variables within the `manifest` scope. If these  variables are present within the `manifest` scope , the plugin will **ignore** the `params.workflow_name` and `params.workflow_ver` values (that are within the `params` scope) and use the ones from the `manifest`. The both `params` and `manifest` scopes are defined in a Nextflow pipeline's config file `nextflow.config`
 
 **Example:**
 
@@ -100,24 +102,6 @@ nextflow run mypipeline.nf -plugins nf-nextpie@0.0.2
 
 Refer to the official [Nextpie documentation](https://github.com/bishwaG/Nextpie/blob/main/docs/nextflow-workflow.md) for details on running an example Nextflow pipeline.
 
-## Building and Installing the Plugin
-
-```bash
-# Clone the repository
-git clone https://github.com/bishwaG/nf-nextpie.git
-
-# Run unit tests
-make check
-
-# Build the plugin
-make
-
-# Install the plugin to $HOME/.nextflow/plugins
-make install
-
-# Upload to GitHub and release a version
-make upload
-```
 
 ## Plugin Structure
 
@@ -153,3 +137,22 @@ make upload
 
 - `nextpieFactory` and `nextpieObserver`: Define custom behaviors in response to workflow events.
 - `nextpiePlugin`: Serves as the plugin entry point.
+
+## Building and Installing the Plugin
+
+```bash
+# Clone the repository
+git clone https://github.com/bishwaG/nf-nextpie.git
+
+# Run unit tests
+make check
+
+# Build the plugin
+make
+
+# Install the plugin to $HOME/.nextflow/plugins
+make install
+
+# Upload to GitHub and release a version
+make upload
+```
