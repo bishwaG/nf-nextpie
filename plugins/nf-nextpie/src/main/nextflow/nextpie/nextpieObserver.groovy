@@ -54,6 +54,14 @@ class nextpieObserver implements TraceObserver {
     void onFlowCreate(Session session) {
         //log.info "Pipeline is starting! 🚀"
         
+        // ANSI escape codes for colors
+        def red = "\033[31m"
+        def green = "\033[32m"
+        def yellow = "\033[33m"
+        def blue = "\033[34m"
+        def reset = "\033[0m"  // Reset to default
+        
+        
         // Get CLI params
         def conf = session.getConfig()
         //println conf
@@ -70,8 +78,13 @@ class nextpieObserver implements TraceObserver {
         
         if(!trace_enabled){
            def err_msg = "Upload will be skipped because trace.enable is set to false.\n"
-           err_msg    += "          Set trace.enable=true and trace.file=/path/to/Trace.txt in nextflow.config."
-           println "[NEXTPIE] ${err_msg}"
+           err_msg    += "          Set trace.enable=true and trace.file=/path/to/Trace.txt in nextflow.config.\n"
+           err_msg += "          Example:\n"
+           err_msg += "          trace { enabled   = true\n"
+           err_msg += "                  overwrite = true\n"
+           err_msg += "                  file      = \"\${params.outDir}/pipeline_info/Trace.txt\"\n"
+           err_msg += "          }"
+           println "${red}[NEXTPIE]${reset} ${err_msg}"
         }
         
         
@@ -81,19 +94,20 @@ class nextpieObserver implements TraceObserver {
         this.group            = conf.params['group']
         this.project          = conf.params['name']
         
-        if( this.workflow_name  !== null && this.workflow_version !== null){
-        println "[NEXTPIE] Pipeline name ${this.workflow_name} and version label ${this.workflow_version} found in params scope."
+        if( this.workflow_name  !== null && this.workflow_version !== null && this.trace_enabled){
+        println "${green}[NEXTPIE]${reset} Pipeline name${green} ${this.workflow_name} ${reset}and version label${green} ${this.workflow_version} ${reset}found in params scope."
         }
         
         // get workflow name and version from manifest
         def manifest = session.config.get('manifest')
         
-        if (manifest) {
+        if (manifest && this.trace_enabled) {
         	def manifestName = conf.manifest['name']
 		def manifestVer  = conf.manifest['version']
 		
 		if( manifestName!== "" && manifestVer !==""){
-		println "[NEXTPIE] Pipeline name ${manifestName} and version label ${manifestVer} found in manifest scope. This will be used."
+		println "${green}[NEXTPIE]${reset} Pipeline name${green} ${manifestName} ${reset}and version label${green} ${manifestVer} ${reset}found in manifest scope."
+		println "${green}[NEXTPIE]${reset} ${yellow}The variables workflow_name and workflow_ver from the params scope will be ignored if they exist.${reset}"
 		this.workflow_name = manifestName
 		this.workflow_version = manifestVer
         	}
@@ -112,7 +126,7 @@ class nextpieObserver implements TraceObserver {
         
         if (file.exists()) {
             if(this.trace_enabled)
-                println "[NEXTPIE] Config file: " + configFile
+                println "${green}[NEXTPIE]${reset} Config file: " + configFile
             
             def content = new String(Files.readAllBytes(configFile))
             def json = new JsonSlurper().parseText(content)
@@ -124,19 +138,21 @@ class nextpieObserver implements TraceObserver {
             def workflow_name  = json['workflow-name-var']
             def workflow_ver   = json['workflow-version-var']
             
+            
             // if provided via commandline or provided via nextflow.config params.workflow_name and params.workflow_ver
             if(this.workflow_name==null || this.workflow_version == null){
-                def error_msg  = "[NEXTPIE] Cannot extract workflow name and version from the pipeline.\n"
+                def error_msg  = "${red}[NEXTPIE] Cannot extract workflow name and version from the pipeline.\n\n"
                 error_msg += "OPTION 1: Add ${workflow_name} and ${workflow_ver} inside params scope in nextflow.config\n"
-                error_msg += "          Example:\n"
+                error_msg += "          Example:\n\n"
                 error_msg += "          params { workflow_name = 'my-workflow'\n"
-                error_msg += "                   workflow_ver  = '1.0.1'\n"
-                error_msg += "          }\n\n"
-                error_msg += "OPTION 2: Add name and version inside manifest scope in nextflow.config. [The highest priority]\n"
-                error_msg += "          Example:\n"
+                error_msg += "                   workflow_ver  = '1.0.1'}\n\n"
+                
+                error_msg += "OPTION 2: Add name and version inside manifest scope in nextflow.config. This is the \n"
+                error_msg += "          recommended approach and takes precedence over the first option.\n"
+                error_msg += "          Example:\n\n"
                 error_msg += "          manifest { name     = 'my-workflow'\n"
-                error_msg += "                     version  = '1.0.1'\n"
-                error_msg += "          }"
+                error_msg += "                     version  = '1.0.1'}\n"
+                
                 log.error(error_msg)
                 
                 System.exit(1)
@@ -151,7 +167,7 @@ class nextpieObserver implements TraceObserver {
             this.api_key = api_key
             
         } else {
-            println("[NEXTPIE] ⚠️ Config file not found. Using defaults.")
+            println("${green}[NEXTPIE]${reset} ⚠️ Config file not found. Using defaults.")
             this.host          = "localhost"
             this.port          = 5000
             this.api_key       = "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M"
@@ -163,20 +179,26 @@ class nextpieObserver implements TraceObserver {
     @Override
     void onFlowComplete() {
         //log.info "Pipeline complete! 👋"
+        // ANSI escape codes for colors
+        def red = "\033[31m"
+        def green = "\033[32m"
+        def yellow = "\033[33m"
+        def blue = "\033[34m"
+        def reset = "\033[0m"  // Reset to default
         
         def t_file = new File(this.trace_file.toString())
         
         if (!t_file.exists()){
-            def error_msg  = "[NEXTPIE] Trace file ${this.trace_file} does not exist.\n"
+            def error_msg  = "${red}[NEXTPIE]${reset} Trace file ${this.trace_file} does not exist.\n"
             log.error(error_msg)
         }
         if (t_file.exists() && this.trace_enabled) {
-            log.info "[NEXTPIE] Uploading usage data!"
-            log.info "[NEXTPIE] Trace file: " + this.trace_file
+            log.info "${green}[NEXTPIE]${reset} Uploading usage data!"
+            log.info "${green}[NEXTPIE]${reset} Trace file: " + this.trace_file
 
 	    // Construct URI
 	    String uri = "http://${host}:${port}/api/v1.0/upload-data"
-	    log.info "[NEXTPIE] URI: " + uri
+	    log.info "${green}[NEXTPIE]${reset} URI: " + uri
 	    
 	    // Build the HTTP client
 	    def client = HttpClient.newHttpClient()
@@ -219,28 +241,20 @@ class nextpieObserver implements TraceObserver {
 
 		// Handle success
 		if (response.statusCode() == 200) {
-		    println "[NEXTPIE] Response:\n " + response.body()
-		} else if (response.statusCode() == 401) {
-		    println "[NEXTPIE] UNAUTHORIZED (401)"
-		} else if (response.statusCode() == 403) {
-		    println "[NEXTPIE] FORBIDDEN (403)"
-		} else if (response.statusCode() == 404) {
-		    println "[NEXTPIE] NOT FOUND (404)"
-		} else if (response.statusCode() == 503) {
-		    println "[NEXTPIE] Service Unavailable (503)"
+		    println "${green}[NEXTPIE]${reset} Response:\n " + response.body()
 		} else {
-		    println "[NEXTPIE] Unexpected status: ${response.statusCode()}"
+		    println "[${red}[NEXTPIE]${reset} Unexpected status: ${response.statusCode()} message:\n${response.body()}"
 		}
 
 	    } catch (UnknownHostException e) {
 		// This exception occurs if the host is unreachable or DNS resolution fails
-		println "[NEXTPIE] Error: Unable to reach host."
+		println "${red}[NEXTPIE]${reset} Error: Unable to reach host."
 	    } catch (IOException e) {
 		// Handle other I/O exceptions such as connection issues
-		println "[NEXTPIE] Error: Network issue or Nextpie server is not live."
+		println "${red}[NEXTPIE]${reset} Error: Network issue or Nextpie server is not live."
 	    } catch (Exception e) {
 		// General error handler
-		println "[NEXTPIE] Error: ${e.message}"
+		println "${red}[NEXTPIE]${reset} Error: ${e.message}"
 	    }
     
             
