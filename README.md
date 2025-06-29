@@ -5,7 +5,7 @@ This project provides a Nextflow plugin called `nf-nextpie` (adapted from [nf-he
 
 The plugin includes a configuration file located at `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. This file contains parameters required for `nf-nextpie` to communicate with the Nextpie server. By default, it assumes Nextpie is running on `localhost`. You can modify the parameters in the config file to suit your environment.
 
-![](assets/images/nf-nextpie.png)
+[](assets/images/nf-nextpie.png)
 
 ## Prerequisites
 
@@ -65,9 +65,9 @@ An API key required for authentication. The client (`nf-nextpie`) uses this key 
 
 ### `workflow-name-var` and `workflow-version-var`
 
-These are the names of the Nextflow variables storing the pipeline name and version, respectively. Their values are set to `workflow_name` and `workflow_ver`, respectively, meaning these variables ( `workflow_name` and `workflow_ver`) should exist in your pipeline's `params` scope (e.g., in `nextflow.config`).
+> ⚠️ NOTE: Do not modify the `workflow-name-var` and `workflow-version-var` variables. These are not user-configurable parameters.
 
-> ⚠️ NOTE: Do not modify `workflow-name-var` and `workflow-version-var` variables.
+These are the names of the Nextflow variables storing the pipeline name and version, respectively. Their values are set to `workflow_name` and `workflow_ver`, respectively, meaning these variables ( `workflow_name` and `workflow_ver`) should exist in your pipeline's `params` scope (e.g., in `nextflow.config`).
 
 The plugin looks for these variables inside the `params` scope. Thus,  `workflow_name` and `workflow_ver` should be defined similar to as follows:
 
