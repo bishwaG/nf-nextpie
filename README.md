@@ -5,7 +5,7 @@ This project provides a Nextflow plugin called `nf-nextpie` (adapted from [nf-he
 
 The plugin includes a configuration file located at `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. This file contains parameters required for `nf-nextpie` to communicate with the Nextpie server. By default, it assumes Nextpie is running on `localhost`. You can modify the parameters in the config file to suit your environment.
 
-[](assets/images/nf-nextpie.png)
+![](assets/images/nf-nextpie.png)
 
 ## Prerequisites
 
