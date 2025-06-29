@@ -5,6 +5,8 @@ This project provides a Nextflow plugin called `nf-nextpie` (adapted from [nf-he
 
 The plugin includes a configuration file located at `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. This file contains parameters required for `nf-nextpie` to communicate with the Nextpie server. By default, it assumes Nextpie is running on `localhost`. You can modify the parameters in the config file to suit your environment.
 
+[](assets/images/nf-nextpie.png)
+
 ## Prerequisites
 
 Since the plugin uploads a trace file along with other metadata (pipeline name, version, research group name, and project name), it is essential to enable trace file generation in a Nextflow pipeline. This can be done in one of the following ways:
@@ -27,7 +29,8 @@ Additionally, Nextpie expects the following default columns to be present in the
 | 9 | e7/58347f | 7319820 | star (Sample_2) | COMPLETED | 0 | 2023-10-04T12:53:12.000 | 1h 37m 56s | 1h 37m 33s | 702.80% | 36.4 GB | 39 GB | 255.2 GB | 95 GB |
 | 10 | 7f/6efca0 | 7320052 | featureCounts (Sample_2) | COMPLETED | 0 | 2023-10-04T14:31:10.000 | 28m 34s | 17m 35s | 341.00% | 1.3 GB | 1.9 GB | 55.5 GB | 21.9 GB |
 
-
+> ⚠️  NOTE: By default, Nextflow trace files have the formats shown above. **Nextpie** supports only these default formats. If you have configured custom formats for dates, times, or other columns, **Nextpie may not parse them correctly**, and this may result in unexpected behavior.
+ 
 ## The Configuration File
 
 After the plugin is first used with Nextflow (e.g., via `-plugins nf-nextpie@0.0.2`), it is downloaded into `$HOME/.nextflow/plugins/nf-nextpie-0.0.2`. The configuration file can be found at:
@@ -62,11 +65,11 @@ An API key required for authentication. The client (`nf-nextpie`) uses this key 
 
 ### `workflow-name-var` and `workflow-version-var`
 
-These are the names of the Nextflow variables that store the pipeline name and version, respectively. By default, they are set to `workflow_name` and `workflow_ver`, meaning these variables should exist in your pipeline's `params` scope (e.g., in `nextflow.config`).
+These are the names of the Nextflow variables storing the pipeline name and version, respectively. Their values are set to `workflow_name` and `workflow_ver`, respectively, meaning these variables ( `workflow_name` and `workflow_ver`) should exist in your pipeline's `params` scope (e.g., in `nextflow.config`).
 
-If your pipeline uses different variable names, update the config file accordingly.
+> ⚠️ NOTE: Do not modify `workflow-name-var` and `workflow-version-var` variables.
 
-The plugin looks for these variables inside the `params` scope. You should define them as follows:
+The plugin looks for these variables inside the `params` scope. Thus,  `workflow_name` and `workflow_ver` should be defined similar to as follows:
 
 ```groovy
 params {
@@ -75,11 +78,11 @@ params {
 }
 ```
 
->NOTE: If you are using [nf-schema](https://github.com/nextflow-io/nf-schema) in your pipeline, the default behavior (section below) might be more attractive because no configurational modification is required in a Nextflow pipeline as long as the pipeline has `name` (variable storing pipeline name) and `version` (variable storing pipeline version) within `manifest` scope.
+The plugin looks for `name` and `version` variables in the `manifest` scope, and for `workflow_name` and `workflow_ver` in the `params` scope. If `name` and `version` are present in the `manifest` scope, the plugin will **ignore** the `workflow_name` and `workflow_ver` values defined in the `params` scope, and instead use those from the `manifest`. 
 
-## Default Behavior
+If you're using [nf-schema](https://github.com/nextflow-io/nf-schema) in your pipeline, leveraging the `manifest` scope can be more advantageous, as it eliminates the need for any intrusive modifications to the Nextflow pipeline. As long as the pipeline includes the `name` (a variable storing the pipeline name) and `version` (a variable storing the pipeline version) within its scope, the `manifest` scope can be easily utilized. 
 
-By default, the plugin searches `name` and `version` variables within the `manifest` scope. If these  variables are present within the `manifest` scope , the plugin will **ignore** the `params.workflow_name` and `params.workflow_ver` values (that are within the `params` scope) and use the ones from the `manifest`. The both `params` and `manifest` scopes are defined in a Nextflow pipeline's config file `nextflow.config`
+Although nf-nextpie can retrieve the workflow name and version from the `params` scope, it is highly recommended to use the `manifest` scope. This is because it is considered best practice to store pipeline metadata (such as `name`, `version`, `affiliation`, `email`, `github`, etc.) within the `manifest` scope.
 
 **Example:**
 
@@ -89,7 +92,8 @@ manifest {
   version = '1.0.1'
 }
 ```
-
+> NOTE: Both `params` and `manifest` scopes are defined in the Nextflow pipeline's configuration file (`nextflow.config`).
+> 
 ## Integrating `nf-nextpie` with a Nextflow Pipeline
 
 There are two ways to integrate `nf-nextpie` into a Nextflow pipeline:
