@@ -67,9 +67,10 @@ An API key required for authentication. The client (`nf-nextpie`) uses this key 
 
 > ⚠️ NOTE: Do not modify the `workflow-name-var` and `workflow-version-var` variables. These are not user-configurable parameters.
 
-These are the names of the Nextflow variables storing the pipeline name and version, respectively. Their values are set to `workflow_name` and `workflow_ver`, respectively, meaning these variables ( `workflow_name` and `workflow_ver`) should exist in your pipeline's `params` scope (e.g., in `nextflow.config`).
 
-The plugin looks for these variables inside the `params` scope. Thus,  `workflow_name` and `workflow_ver` should be defined similar to as follows:
+These are the names of the Nextflow variables that store the pipeline name and version, respectively. Their values are expected to be set to `workflow_name` and `workflow_ver`, meaning these variables must exist within your pipeline's `params` scope (e.g., in `nextflow.config`).
+
+The plugin searches for these variables in the `params` scope. Therefore, `workflow_name` and `workflow_ver` should be defined as follows:
 
 ```groovy
 params {
@@ -78,12 +79,12 @@ params {
 }
 ```
 
-The plugin looks for `name` and `version` variables in the `manifest` scope, and for `workflow_name` and `workflow_ver` in the `params` scope. If `name` and `version` are present in the `manifest` scope, the plugin will **ignore** the `workflow_name` and `workflow_ver` values defined in the `params` scope, and instead use those from the `manifest`. 
 
-If you're using [nf-schema](https://github.com/nextflow-io/nf-schema) in your pipeline, leveraging the `manifest` scope can be more advantageous, as it eliminates the need for any intrusive modifications to the Nextflow pipeline. As long as the pipeline includes the `name` (a variable storing the pipeline name) and `version` (a variable storing the pipeline version) within its scope, the `manifest` scope can be easily utilized. 
+The plugin looks for `name` and `version` in the `manifest` scope, and for `workflow_name` and `workflow_ver` in the `params` scope. If `name` and `version` are present in `manifest`, the plugin will **ignore** `workflow_name` and `workflow_ver` from `params` and instead use the values from `manifest`.
 
-Although nf-nextpie can retrieve the workflow name and version from the `params` scope, it is highly recommended to use the `manifest` scope. This is because it is considered best practice to store pipeline metadata (such as `name`, `version`, `affiliation`, `email`, `github`, etc.) within the `manifest` scope.
+If you're using [nf-schema](https://github.com/nextflow-io/nf-schema) in your pipeline, leveraging the `manifest` scope is often more advantageous, as it avoids the need for intrusive modifications to your Nextflow pipeline. As long as the `name` and `version` variables are defined in the `manifest` scope, they will be automatically picked up by the plugin.
 
+While `nf-nextpie` can retrieve the workflow name and version from the `params` scope, using the `manifest` scope is highly recommended. It is considered best practice to store pipeline metadata—such as `name`, `version`, `affiliation`, `email`, `github`, and similar fields—within the `manifest` block.
 **Example:**
 
 ```groovy
