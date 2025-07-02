@@ -1,5 +1,3 @@
-
-
 # The `nf-nextpie` Plugin
 
 This project provides a Nextflow plugin called `nf-nextpie` (adapted from [nf-hello](https://github.com/nextflow-io/nf-hello)) that serves as a client for the [Nextpie](https://github.com/bishwaG/Nextpie/) server. The plugin uploads a trace file (containing resource usage data) from a Nextflow pipeline to Nextpie for aggregated resource usage analysis and visualization.
@@ -34,11 +32,19 @@ Additionally, Nextpie expects the following default columns to be present in the
  
 ## The Configuration File
 
-After the plugin is first used with Nextflow (e.g., via `-plugins nf-nextpie@0.0.2`), it is downloaded into `$HOME/.nextflow/plugins/nf-nextpie-0.0.2`. The configuration file can be found at:
+
+Upon first use in a Nextflow pipeline (e.g., using `-plugins nf-nextpie@0.0.2`), the plugin is automatically downloaded to:
+
+```bash
+$HOME/.nextflow/plugins/nf-nextpie-0.0.2
 
 ```
+Its configuration file can be found at:
+
+```bash
 $HOME/.nextflow/plugins/nf-nextpie-0.0.2/classes/nextflow/nextpie/config.json
 ```
+
 
 The default contents of `config.json` are:
 
