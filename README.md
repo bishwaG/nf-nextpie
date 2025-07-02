@@ -1,4 +1,5 @@
 
+
 # The `nf-nextpie` Plugin
 
 This project provides a Nextflow plugin called `nf-nextpie` (adapted from [nf-hello](https://github.com/nextflow-io/nf-hello)) that serves as a client for the [Nextpie](https://github.com/bishwaG/Nextpie/) server. The plugin uploads a trace file (containing resource usage data) from a Nextflow pipeline to Nextpie for aggregated resource usage analysis and visualization.
@@ -12,7 +13,7 @@ The plugin includes a configuration file located at `plugins/nf-nextpie/src/main
 Since the plugin uploads a trace file along with other metadata (pipeline name, version, research group name, and project name), it is essential to enable trace file generation in a Nextflow pipeline. This can be done in one of the following ways:
 
 - By supplying the `-with-trace` command-line option to Nextflow.
-- By adding `-with-trace` to the pipeline's configuration file (`nextflow.config`).
+- By adding `trace.enabled=true` to the pipeline's configuration file (`nextflow.config`).
 
 Additionally, Nextpie expects the following default columns to be present in the trace file. If you have custom columns, ensure that the trace file still includes the default columns with values in the expected format. However, there is no strict requirement for the order of the columns.
 
