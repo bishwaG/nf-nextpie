@@ -5,7 +5,7 @@
 
 This project provides a Nextflow plugin called `nf-nextpie` (adapted from [nf-hello](https://github.com/nextflow-io/nf-hello)) that serves as a client for the [Nextpie](https://github.com/bishwaG/Nextpie/) server. The plugin uploads a trace file (containing resource usage data) from a Nextflow pipeline to Nextpie for aggregated resource usage analysis and visualization.
 
-The plugin includes a configuration file located at `plugins/nf-nextpie/src/main/nextflow/nextpie/config.json`. This file contains parameters required for `nf-nextpie` to communicate with the Nextpie server. By default, it assumes Nextpie is running on `localhost`. You can modify the parameters in the config file to suit your environment.
+The plugin includes a configuration closure calle `nextpie`. This closure contains parameters required for `nf-nextpie` to communicate with the Nextpie server. By default, it assumes Nextpie is running on `localhost`. You can modify the parameters in the config file to suit your environment.
 
 ![](assets/images/nf-nextpie.png)
 
@@ -33,31 +33,23 @@ Additionally, Nextpie expects the following default columns to be present in the
 
 > ⚠️  NOTE: By default, Nextflow trace files have the formats shown above. **Nextpie** supports only these default formats. If you have configured custom formats for dates, times, or other columns, **Nextpie may not parse them correctly**, and this may result in unexpected behavior.
  
-## The Configuration File
+## The Configuration
 
+Add a new `nextpie` closure in your `nextflow.config` (or provide all params via command line using Nextflow syntax)
 
-Upon first use in a Nextflow pipeline (e.g., using `-plugins nf-nextpie@0.0.2`), the plugin is automatically downloaded to:
-
-```bash
-$HOME/.nextflow/plugins/nf-nextpie-0.0.2
-
-```
-Its configuration file can be found at:
-
-```bash
-$HOME/.nextflow/plugins/nf-nextpie-0.0.2/classes/nextflow/nextpie/config.json
-```
-
-
-The default contents of `config.json` are:
+For example:
 
 ```json
-{
-  "host": "localhost",
-  "port": 5000,
-  "api-key": "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M",
-  "workflow-name-var": "workflow_name",
-  "workflow-version-var": "workflow_ver"
+plugins {
+  id 'nf-nextpie@0.0.2'
+}
+ 
+nextpie{
+  host = "localhost"
+  port = 5000
+  api_key = "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M"
+  workflow_name_var = "workflow_name"
+  workflow_version_var = "workflow_ver"
 }
 ```
 
@@ -69,13 +61,13 @@ The hostname or IP address of the machine running the Nextpie server. The defaul
 
 The port on which the Nextpie server is running. Do not change this unless you know what you're doing or if the default port is already in use.
 
-### `api-key`
+### `api_key`
 
 An API key required for authentication. The client (`nf-nextpie`) uses this key to authenticate with the Nextpie server. In a production environment, it is highly recommended to generate a unique API key using the Nextpie GUI and replace the default value for security purposes.
 
-### `workflow-name-var` and `workflow-version-var`
+### `workflow_name_var` and `workflow_version_var`
 
-> ⚠️ NOTE: Do not modify the `workflow-name-var` and `workflow-version-var` variables. These are not user-configurable parameters.
+> ⚠️ NOTE: Do not modify the `workflow_name_var` and `workflow_version_var` variables. These are not user-configurable parameters.
 
 
 These are the names of the Nextflow variables that store the pipeline name and version, respectively. Their values are expected to be set to `workflow_name` and `workflow_ver`, meaning these variables must exist within your pipeline's `params` scope (e.g., in `nextflow.config`).
@@ -145,7 +137,7 @@ Refer to the official [Nextpie documentation](https://github.com/bishwaG/Nextpie
 │          ├── main                         # Plugin implementation sources
 │          │   └── nextflow
 │          │       └── nextpie
-│          │           ├── config.json
+│          │           ├── nextpieConfig.groovy
 │          │           ├── nextpieFactory.groovy
 │          │           ├── nextpieObserver.groovy
 │          │           └── nextpiePlugin.groovy

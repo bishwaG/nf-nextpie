@@ -12,3 +12,4 @@ gradle.properties
 build/*
 plugins/*/build
 buildSrc/build
+/.idea/
