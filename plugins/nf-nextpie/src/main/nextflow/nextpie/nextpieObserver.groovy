@@ -67,15 +67,9 @@ class nextpieObserver implements TraceObserver {
         //println conf
         
         // get trace file
-        def trace_file    = conf.trace['file']
         def trace_enabled = conf.trace['enabled']
-        
-        this.trace_file = trace_file
-        this.trace_enabled = trace_enabled
-        
         //println "[NEXTPIE] Trace enabled: " + this.trace_file
-        //println "[NEXTPIE] Trace file: " + this.trace_enabled
-        
+
         if(!trace_enabled){
            def err_msg = "Upload will be skipped because trace.enable is set to false.\n"
            err_msg    += "          Set trace.enable=true and trace.file=/path/to/Trace.txt in nextflow.config.\n"
@@ -85,9 +79,15 @@ class nextpieObserver implements TraceObserver {
            err_msg += "                  file      = \"\${params.outDir}/pipeline_info/Trace.txt\"\n"
            err_msg += "          }"
            println "${red}[NEXTPIE]${reset} ${err_msg}"
+           return
         }
-        
-        
+
+        def trace_file    = conf.trace['file']
+
+        this.trace_file = trace_file
+        this.trace_enabled = trace_enabled
+
+
         // get workflow name and version
         this.workflow_name    = conf.params['workflow_name']
         this.workflow_version = conf.params['workflow_ver']
@@ -103,77 +103,54 @@ class nextpieObserver implements TraceObserver {
         
         if (manifest && this.trace_enabled) {
         	def manifestName = conf.manifest['name']
-		def manifestVer  = conf.manifest['version']
-		
-		if( manifestName!== "" && manifestVer !==""){
-		println "${green}[NEXTPIE]${reset} Pipeline name${green} ${manifestName} ${reset}and version label${green} ${manifestVer} ${reset}found in manifest scope."
-		println "${green}[NEXTPIE]${reset} ${yellow}The variables workflow_name and workflow_ver from the params scope will be ignored if they exist.${reset}"
-		this.workflow_name = manifestName
-		this.workflow_version = manifestVer
+            def manifestVer  = conf.manifest['version']
+
+            if( manifestName!== "" && manifestVer !==""){
+                println "${green}[NEXTPIE]${reset} Pipeline name${green} ${manifestName} ${reset}and version label${green} ${manifestVer} ${reset}found in manifest scope."
+                println "${green}[NEXTPIE]${reset} ${yellow}The variables workflow_name and workflow_ver from the params scope will be ignored if they exist.${reset}"
+                this.workflow_name = manifestName
+                this.workflow_version = manifestVer
         	}
         
         }
         
-        // Get the plugin's directory path and point to config.json
-        def pluginDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).toString()
-        def configFile = Paths.get(pluginDir, "/nextflow/nextpie/config.json")
-        
-        //println "Plugin Dir: " + pluginDir
-        //println "Config File: " + configFile
-        
-        // Read file content as string
-        def file = new File(configFile.toString())
-        
-        if (file.exists()) {
-            if(this.trace_enabled)
-                println "${green}[NEXTPIE]${reset} Config file: " + configFile
-            
-            def content = new String(Files.readAllBytes(configFile))
-            def json = new JsonSlurper().parseText(content)
-            
-            // get json data using keys
-            def host    = json['host']
-            def port    = json['port']
-            def api_key = json['api-key']
-            def workflow_name  = json['workflow-name-var']
-            def workflow_ver   = json['workflow-version-var']
-            
-            
-            // if provided via commandline or provided via nextflow.config params.workflow_name and params.workflow_ver
-            if(this.workflow_name==null || this.workflow_version == null){
-                def error_msg  = "${red}[NEXTPIE] Cannot extract workflow name and version from the pipeline.\n\n"
-                error_msg += "OPTION 1: Add ${workflow_name} and ${workflow_ver} inside params scope in nextflow.config\n"
-                error_msg += "          Example:\n\n"
-                error_msg += "          params { workflow_name = 'my-workflow'\n"
-                error_msg += "                   workflow_ver  = '1.0.1'}\n\n"
-                
-                error_msg += "OPTION 2: Add name and version inside manifest scope in nextflow.config. This is the \n"
-                error_msg += "          recommended approach and takes precedence over the first option.\n"
-                error_msg += "          Example:\n\n"
-                error_msg += "          manifest { name     = 'my-workflow'\n"
-                error_msg += "                     version  = '1.0.1'}\n"
-                
-                log.error(error_msg)
-                
-                System.exit(1)
-            }
-            
-            //println(this.workflow_name)
-            //println(this.workflow_version)
-            //println("Host: $host, Port: $port, API-key: $api_key")
-            
-            this.host    = host
-            this.port    = port.toString().toInteger()
-            this.api_key = api_key
-            
-        } else {
-            println("${green}[NEXTPIE]${reset} ⚠️ Config file not found. Using defaults.")
-            this.host          = "localhost"
-            this.port          = 5000
-            this.api_key       = "jWCr-uqJB9fO9s1Lj2QiydXs4fFY2M"
-            this.workflow_name = conf.params['workflow_name']
-            this.workflow_version  = conf.params['workflow_ver']
+        def config = new nextpieConfig( (session.config.nextpie ?: [:]) as Map )
+
+        // get json data using keys
+        def host    = config.host
+        def port    = config.port
+        def api_key = config.apiKey
+        def workflow_name  = config.workflowNameVar
+        def workflow_ver   = config.workflowVersionVar
+
+
+        // if provided via commandline or provided via nextflow.config params.workflow_name and params.workflow_ver
+        if(this.workflow_name==null || this.workflow_version == null){
+            def error_msg  = "${red}[NEXTPIE] Cannot extract workflow name and version from the pipeline.\n\n"
+            error_msg += "OPTION 1: Add ${workflow_name} and ${workflow_ver} inside params scope in nextflow.config\n"
+            error_msg += "          Example:\n\n"
+            error_msg += "          params { workflow_name = 'my-workflow'\n"
+            error_msg += "                   workflow_ver  = '1.0.1'}\n\n"
+
+            error_msg += "OPTION 2: Add name and version inside manifest scope in nextflow.config. This is the \n"
+            error_msg += "          recommended approach and takes precedence over the first option.\n"
+            error_msg += "          Example:\n\n"
+            error_msg += "          manifest { name     = 'my-workflow'\n"
+            error_msg += "                     version  = '1.0.1'}\n"
+
+            log.error(error_msg)
+
+            System.exit(1)
         }
+
+        //println(this.workflow_name)
+        //println(this.workflow_version)
+        //println("Host: $host, Port: $port, API-key: $api_key")
+
+        this.host    = host
+        this.port    = port.toString().toInteger()
+        this.api_key = api_key
+
     }
 
     @Override
